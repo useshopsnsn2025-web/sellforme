@@ -1,0 +1,62 @@
+:root {
+  /* Brand Colors */
+  --color-primary: #5356EE;
+  --color-primary-hover: #4244d4;
+  --color-primary-light: #eeeeff;
+  --color-secondary: #1A1A1A;
+  --color-accent: #AE2238;
+
+  /* Text Colors */
+  --color-text: #1A1A1A;
+  --color-text-light: #666666;
+  --color-text-lighter: #999999;
+  --color-text-white: #FFFFFF;
+
+  /* Background Colors */
+  --color-bg: #FFFFFF;
+  --color-bg-light: #F8F8F8;
+  --color-bg-gray: #F1F2F4;
+  --color-bg-dark: #1A1A1A;
+
+  /* Border */
+  --color-border: #E5E5E5;
+  --color-border-light: #EEEEEE;
+
+  /* Status Colors */
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-danger: #AE2238;
+  --color-info: #17a2b8;
+
+  /* Layout */
+  --container-width: 1320px;
+  --header-height: 70px;
+  --announcement-height: 40px;
+  --section-padding: 80px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 40px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+
+  /* Font */
+  --font-family: 'Poppins', sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 25px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+}

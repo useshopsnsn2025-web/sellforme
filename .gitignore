@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment files (contain secrets)
+server/.env
+admin/.env
+frontend/.env
+
+# Keep example env
+!server/.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.sw?
+
+# Uploads (user content, not code)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Template data folder
+GMC-FEFF3EF9/
+
+# Temp files
+*.local

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python d:/phpstudy_pro/WWW/PC/.claude/skills/ui-ux-pro-max/scripts/search.py \"bento grid layout\" --domain style -n 3)",
+      "Bash(PYTHONIOENCODING=utf-8 python d:/phpstudy_pro/WWW/PC/.claude/skills/ui-ux-pro-max/scripts/search.py \"bento grid layout\" --domain style -n 2)",
+      "Bash(curl -s http://127.0.0.1:3100/api/collections)",
+      "Bash(find /d/phpstudy_pro/WWW/PC/frontend -name *.env* -o -name package.json)",
+      "Bash(grep -r \"axios\\\\|fetch\\\\|api\" /d/phpstudy_pro/WWW/PC/frontend/src/main.js /d/phpstudy_pro/WWW/PC/frontend/src/views/*.vue)",
+      "Read(//c/Users/Administrator/AppData/Local/Temp/claude/d--phpstudy-pro-WWW-PC/tasks/**)",
+      "Bash(node -e \":*)",
+      "Bash(node tmp_phones.js)",
+      "Bash(node -e \"try { require\\(''./src/routes/adminPageConfig''\\); console.log\\(''OK''\\) } catch\\(e\\) { console.error\\(e.message\\) }\")",
+      "Bash(curl -s http://127.0.0.1:3100/api/page-config/home)",
+      "Bash(cmd.exe /c start http://127.0.0.1:5174/decoration)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/decoration)",
+      "Bash(cmd.exe /c start http://localhost:3200/decoration)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3200/)"
+    ]
+  }
+}

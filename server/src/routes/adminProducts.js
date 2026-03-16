@@ -55,7 +55,7 @@ function fetchImage(url, retries = 2) {
       timeout: 30000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept': 'image/jpeg,image/png,image/webp,image/*;q=0.8,*/*;q=0.5',
         'Referer': url
       }
     }
@@ -118,6 +118,27 @@ function stripHtml(html) {
     .replace(/&#39;/g, "'")
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+// Detect real image format from magic bytes
+function detectImageExt(buffer) {
+  if (!buffer || buffer.length < 12) return 'jpg'
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return 'jpg'
+  // PNG: 89 50 4E 47
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'png'
+  // GIF: 47 49 46
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return 'gif'
+  // WebP: RIFF....WEBP
+  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return 'webp'
+  // AVIF: ....ftypavif
+  if (buffer.length > 11 && buffer.slice(4, 12).toString('ascii').startsWith('ftypavif')) return 'avif'
+  // HEIF: ....ftyp
+  if (buffer.length > 8 && buffer.slice(4, 8).toString('ascii') === 'ftyp') return 'heif'
+  // BMP: 42 4D
+  if (buffer[0] === 0x42 && buffer[1] === 0x4D) return 'bmp'
+  return 'jpg'
 }
 
 // Concurrently download images in batches
@@ -214,9 +235,8 @@ router.post('/download', async (req, res) => {
 
         // Image files + dimension txt
         for (let i = 0; i < imageUrls.length; i++) {
-          const url = imageUrls[i]
-          const ext = (url.match(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i)?.[1] || 'jpg').toLowerCase()
           const imgBuffer = allBuffers[bufferIdx++]
+          const ext = imgBuffer ? detectImageExt(imgBuffer) : 'jpg'
           if (imgBuffer) {
             archive.append(imgBuffer, { name: `${folder}/${i + 1}.${ext}` })
             const dims = getImageDimensions(imgBuffer)

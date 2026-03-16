@@ -7,6 +7,7 @@ const upload = require('../middleware/upload')
 const archiver = require('archiver')
 const https = require('https')
 const http = require('http')
+const sharp = require('sharp')
 
 router.use(adminAuth)
 
@@ -235,9 +236,16 @@ router.post('/download', async (req, res) => {
 
         // Image files + dimension txt
         for (let i = 0; i < imageUrls.length; i++) {
-          const imgBuffer = allBuffers[bufferIdx++]
-          const ext = imgBuffer ? detectImageExt(imgBuffer) : 'jpg'
+          let imgBuffer = allBuffers[bufferIdx++]
           if (imgBuffer) {
+            let ext = detectImageExt(imgBuffer)
+            // Convert AVIF/HEIF/WebP to JPG for maximum compatibility
+            if (ext === 'avif' || ext === 'heif' || ext === 'webp') {
+              try {
+                imgBuffer = await sharp(imgBuffer).jpeg({ quality: 90 }).toBuffer()
+                ext = 'jpg'
+              } catch { /* keep original if conversion fails */ }
+            }
             archive.append(imgBuffer, { name: `${folder}/${i + 1}.${ext}` })
             const dims = getImageDimensions(imgBuffer)
             archive.append(dims ? `${dims.width} X ${dims.height}` : '', { name: `${folder}/${i + 1}.txt` })

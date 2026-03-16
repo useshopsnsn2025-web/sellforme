@@ -48,19 +48,57 @@ router.get('/', async (req, res) => {
 })
 
 // Helper: download a remote image and return its buffer
-function fetchImage(url) {
+function fetchImage(url, retries = 2) {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http
-    client.get(url, { timeout: 15000 }, (response) => {
-      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        return fetchImage(response.headers.location).then(resolve).catch(reject)
+    const options = {
+      timeout: 30000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Referer': url
       }
-      if (response.statusCode !== 200) return reject(new Error(`HTTP ${response.statusCode}`))
+    }
+    client.get(url, options, (response) => {
+      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        let redirectUrl = response.headers.location
+        if (redirectUrl.startsWith('/')) {
+          const u = new URL(url)
+          redirectUrl = u.origin + redirectUrl
+        }
+        return fetchImage(redirectUrl, retries).then(resolve).catch(reject)
+      }
+      if (response.statusCode !== 200) {
+        if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+        return reject(new Error(`HTTP ${response.statusCode}`))
+      }
+      const contentType = response.headers['content-type'] || ''
+      if (!contentType.startsWith('image/') && contentType !== 'application/octet-stream') {
+        if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+        return reject(new Error(`Not an image: ${contentType}`))
+      }
       const chunks = []
       response.on('data', chunk => chunks.push(chunk))
-      response.on('end', () => resolve(Buffer.concat(chunks)))
-      response.on('error', reject)
-    }).on('error', reject)
+      response.on('end', () => {
+        const buf = Buffer.concat(chunks)
+        if (buf.length < 100) {
+          if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+          return reject(new Error('Image too small'))
+        }
+        resolve(buf)
+      })
+      response.on('error', (err) => {
+        if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+        reject(err)
+      })
+    }).on('error', (err) => {
+      if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+      reject(err)
+    }).on('timeout', function() {
+      this.destroy()
+      if (retries > 0) return fetchImage(url, retries - 1).then(resolve).catch(reject)
+      reject(new Error('Timeout'))
+    })
   })
 }
 

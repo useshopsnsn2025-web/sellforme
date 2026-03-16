@@ -7,7 +7,35 @@ const upload = require('../middleware/upload')
 const archiver = require('archiver')
 const https = require('https')
 const http = require('http')
-const sharp = require('sharp')
+const { execFile } = require('child_process')
+const os = require('os')
+const fs = require('fs')
+const path = require('path')
+
+// Convert AVIF/HEIF/WebP to JPG using ffmpeg
+function convertToJpg(buffer) {
+  return new Promise((resolve, reject) => {
+    const tmpDir = os.tmpdir()
+    const id = Date.now() + '_' + Math.random().toString(36).slice(2)
+    const inFile = path.join(tmpDir, `img_${id}.avif`)
+    const outFile = path.join(tmpDir, `img_${id}.jpg`)
+    fs.writeFileSync(inFile, buffer)
+    execFile('ffmpeg', ['-y', '-i', inFile, '-q:v', '2', outFile], { timeout: 15000 }, (err) => {
+      try { fs.unlinkSync(inFile) } catch {}
+      if (err) {
+        try { fs.unlinkSync(outFile) } catch {}
+        return reject(err)
+      }
+      try {
+        const out = fs.readFileSync(outFile)
+        fs.unlinkSync(outFile)
+        resolve(out)
+      } catch (e) {
+        reject(e)
+      }
+    })
+  })
+}
 
 router.use(adminAuth)
 
@@ -242,7 +270,7 @@ router.post('/download', async (req, res) => {
             // Convert AVIF/HEIF/WebP to JPG for maximum compatibility
             if (ext === 'avif' || ext === 'heif' || ext === 'webp') {
               try {
-                imgBuffer = await sharp(imgBuffer).jpeg({ quality: 90 }).toBuffer()
+                imgBuffer = await convertToJpg(imgBuffer)
                 ext = 'jpg'
               } catch { /* keep original if conversion fails */ }
             }

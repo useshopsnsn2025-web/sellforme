@@ -11,18 +11,18 @@ const pages = {
     content: `
     <p>Welcome to <strong>SellForMe</strong> — your trusted global marketplace for certified pre-owned electronics. Founded with a mission to make premium technology accessible and affordable for everyone, we connect individual sellers with buyers around the world through a transparent, secure consignment model.</p>
 
-    <div class="about-hero-img"><img src="/src/static/images/about-us/1.png" alt="Our Team" /></div>
+    <div class="about-hero-img"><img src="/images/about-us/1.png" alt="Our Team" /></div>
 
     <h3>Our Story</h3>
     <p>We started SellForMe because we believed the secondary electronics market was broken — overpriced, untrustworthy, and wasteful. Too many perfectly functional devices were being discarded simply because people didn't have a reliable way to sell or buy them. We set out to change that.</p>
     <p>Today, we serve thousands of customers across 50+ countries, offering a curated selection of pre-owned smartphones, tablets, laptops, and accessories — each carefully inspected and honestly described before it reaches your door.</p>
 
     <h3>How We Work</h3>
-    <div class="about-img"><img src="/src/static/images/about-us/2.png" alt="Global Network" /></div>
+    <div class="about-img"><img src="/images/about-us/2.png" alt="Global Network" /></div>
     <p>We operate on a consignment model: sellers send us their devices, our team inspects and grades each item, and we handle everything from professional photography to secure payment processing and global shipping. Sellers get paid when their item sells. Buyers get a thoroughly vetted product backed by our full protection guarantee.</p>
 
     <h3>Our Commitment to Quality</h3>
-    <div class="about-img"><img src="/src/static/images/about-us/3.png" alt="Quality Assurance" /></div>
+    <div class="about-img"><img src="/images/about-us/3.png" alt="Quality Assurance" /></div>
     <ul>
       <li><strong>Honest Condition Grading:</strong> Every item is graded by our trained inspection team using a standardized condition scale — no surprises when the package arrives.</li>
       <li><strong>Functionality Tested:</strong> All devices undergo a multi-point functional test covering display, battery, cameras, buttons, ports, and connectivity.</li>
@@ -31,7 +31,7 @@ const pages = {
     </ul>
 
     <h3>Why Choose SellForMe?</h3>
-    <div class="about-img"><img src="/src/static/images/about-us/4.png" alt="Customer Support" /></div>
+    <div class="about-img"><img src="/images/about-us/4.png" alt="Customer Support" /></div>
     <ul>
       <li>✓ Free worldwide shipping on every order</li>
       <li>✓ Full buyer protection on all purchases</li>
@@ -47,7 +47,7 @@ const pages = {
     <p><strong>Sustainability.</strong> Choosing pre-owned electronics is one of the most impactful environmental decisions a consumer can make. We're proud to be part of that movement.</p>
 
     <h3>Our Fulfillment Center</h3>
-    <div class="about-img"><img src="/src/static/images/about-us/5.png" alt="Fulfillment Center" /></div>
+    <div class="about-img"><img src="/images/about-us/5.png" alt="Fulfillment Center" /></div>
     <p>Our state-of-the-art fulfillment center ensures every order is carefully packaged and shipped with precision. From inspection to dispatch, we maintain the highest standards so your purchase arrives safely and on time.</p>
 
     <h3>Get in Touch</h3>

@@ -250,21 +250,122 @@ router.get('/:provider', async (req, res) => {
   }
 })
 
-// OAuth callback (placeholder - implement token exchange per provider)
+// Helper: HTTP POST with JSON body (returns parsed JSON)
+function httpPost(url, data) {
+  return new Promise((resolve, reject) => {
+    const body = typeof data === 'string' ? data : JSON.stringify(data)
+    const isForm = typeof data === 'string'
+    const parsed = new URL(url)
+    const options = {
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': isForm ? 'application/x-www-form-urlencoded' : 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }
+    const req = require('https').request(options, (resp) => {
+      const chunks = []
+      resp.on('data', c => chunks.push(c))
+      resp.on('end', () => {
+        try { resolve(JSON.parse(Buffer.concat(chunks).toString())) }
+        catch { reject(new Error('Invalid JSON response')) }
+      })
+    })
+    req.on('error', reject)
+    req.write(body)
+    req.end()
+  })
+}
+
+// Helper: HTTP GET with auth header (returns parsed JSON)
+function httpGet(url, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url)
+    const options = { hostname: parsed.hostname, path: parsed.pathname + parsed.search, headers }
+    require('https').get(options, (resp) => {
+      const chunks = []
+      resp.on('data', c => chunks.push(c))
+      resp.on('end', () => {
+        try { resolve(JSON.parse(Buffer.concat(chunks).toString())) }
+        catch { reject(new Error('Invalid JSON response')) }
+      })
+    }).on('error', reject)
+  })
+}
+
+// Token exchange and user profile fetchers per provider
+const OAUTH_HANDLERS = {
+  async google(code, cfg) {
+    const tokenData = await httpPost('https://oauth2.googleapis.com/token',
+      `code=${encodeURIComponent(code)}&client_id=${encodeURIComponent(cfg.client_id)}&client_secret=${encodeURIComponent(cfg.client_secret)}&redirect_uri=${encodeURIComponent(cfg.redirect_uri)}&grant_type=authorization_code`)
+    if (!tokenData.access_token) throw new Error(tokenData.error_description || 'Failed to get access token')
+    const profile = await httpGet('https://www.googleapis.com/oauth2/v2/userinfo', {
+      Authorization: `Bearer ${tokenData.access_token}`
+    })
+    return { email: profile.email, first_name: profile.given_name || '', last_name: profile.family_name || '', avatar: profile.picture || '', oauth_id: profile.id }
+  },
+  async facebook(code, cfg) {
+    const tokenData = await httpGet(`https://graph.facebook.com/v18.0/oauth/access_token?client_id=${cfg.client_id}&client_secret=${cfg.client_secret}&redirect_uri=${encodeURIComponent(cfg.redirect_uri)}&code=${encodeURIComponent(code)}`)
+    if (!tokenData.access_token) throw new Error('Failed to get access token')
+    const profile = await httpGet(`https://graph.facebook.com/me?fields=id,email,first_name,last_name,picture&access_token=${tokenData.access_token}`)
+    return { email: profile.email, first_name: profile.first_name || '', last_name: profile.last_name || '', avatar: profile.picture?.data?.url || '', oauth_id: profile.id }
+  },
+}
+
+// OAuth callback
 router.get('/:provider/callback', async (req, res) => {
   try {
     const { provider } = req.params
     const { code } = req.query
-    if (!code) return res.status(400).send('Missing authorization code.')
+    if (!code) return res.redirect('/?oauth_error=missing_code')
 
     const cfg = await OAuthProvider.findOne({ provider, enabled: true })
-    if (!cfg) return res.status(400).send('Provider not configured.')
+    if (!cfg) return res.redirect('/?oauth_error=not_configured')
 
-    // TODO: Exchange code for token, fetch user profile, create/login user
-    // For now redirect to frontend with a message
-    res.redirect(`/?oauth=${provider}&status=pending`)
+    const handler = OAUTH_HANDLERS[provider]
+    if (!handler) return res.redirect('/?oauth_error=unsupported')
+
+    const profile = await handler(code, cfg)
+    if (!profile.email) return res.redirect('/?oauth_error=no_email')
+
+    // Find or create user
+    let user = await User.findOne({ email: profile.email })
+    if (!user) {
+      const client = extractClientInfo(req)
+      user = await User.create({
+        email: profile.email,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        password: require('crypto').randomBytes(32).toString('hex'),
+        register_source: provider,
+        register_ip: client.ip,
+        register_device: client.device,
+        register_ua: client.ua,
+        register_browser: client.browser,
+        register_os: client.os,
+        last_login: new Date(),
+        last_login_ip: client.ip,
+        last_login_device: client.device,
+        login_count: 1,
+      })
+      sendWelcomeEmail(user).catch(() => {})
+    } else {
+      const client = extractClientInfo(req)
+      user.last_login = new Date()
+      user.last_login_ip = client.ip
+      user.last_login_device = client.device
+      user.login_count = (user.login_count || 0) + 1
+      await user.save()
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN })
+
+    // Redirect to frontend with token - frontend will store it
+    res.redirect(`/?oauth_token=${token}&oauth_user=${encodeURIComponent(JSON.stringify(user.toJSON()))}`)
   } catch (err) {
-    res.status(500).send(err.message)
+    res.redirect(`/?oauth_error=${encodeURIComponent(err.message)}`)
   }
 })
 

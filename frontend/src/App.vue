@@ -21,7 +21,20 @@ if (refCode) {
 
 // Restore user session on page load
 const userStore = useUserStore()
-userStore.restoreSession()
+
+// Handle OAuth callback token
+const oauthToken = urlParams.get('oauth_token')
+const oauthUser = urlParams.get('oauth_user')
+if (oauthToken && oauthUser) {
+  try {
+    const userData = JSON.parse(oauthUser)
+    userStore.login(userData, oauthToken)
+  } catch {}
+  // Clean URL
+  window.history.replaceState({}, '', window.location.pathname)
+} else {
+  userStore.restoreSession()
+}
 
 // Track on initial load
 trackPageView(window.location.pathname + window.location.search)

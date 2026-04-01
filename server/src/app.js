@@ -81,6 +81,7 @@ app.use('/api/admin/users', require('./routes/adminUsers'))
 app.use('/api/admin/dashboard', require('./routes/adminDashboard'))
 app.use('/api/admin/scraper', require('./routes/adminScraper'))
 app.use('/api/admin/whatsapp', require('./routes/adminWhatsapp'))
+app.use('/api/admin/line', require('./routes/adminLine'))
 app.use('/api/admin/agents', require('./routes/adminAgents'))
 app.use('/api/admin/traffic', require('./routes/adminTraffic'))
 app.use('/api/admin/oauth', require('./routes/adminOAuth'))
@@ -93,11 +94,23 @@ app.use('/api/admin/subscribers', require('./routes/adminSubscribers'))
 app.use('/api/products', require('./routes/products'))
 app.use('/api/collections', require('./routes/collections'))
 app.use('/api/whatsapp', require('./routes/whatsapp'))
+app.use('/api/line', require('./routes/line'))
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/orders', require('./routes/orders'))
 app.use('/api/traffic', require('./routes/traffic'))
 app.use('/api/page-config', require('./routes/pageConfig'))
 app.use('/api/subscribe', require('./routes/subscribe'))
+
+// Public: get contact method setting
+app.get('/api/contact-method', async (req, res) => {
+  try {
+    const SiteConfig = require('./models/SiteConfig')
+    const cfg = await SiteConfig.findOne({ key: 'contact_method' })
+    res.json({ code: 200, msg: 'ok', data: { method: cfg?.value || 'whatsapp' } })
+  } catch {
+    res.json({ code: 200, msg: 'ok', data: { method: 'whatsapp' } })
+  }
+})
 
 // Health check (with DB status)
 app.get('/api/health', (req, res) => {

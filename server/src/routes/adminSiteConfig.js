@@ -59,6 +59,7 @@ const DEFAULT_ORDER_TPL = `<div style="max-width:600px;margin:0 auto;font-family
 const DEFAULTS = [
   { key: 'site_url', value: '', label: '前端站点URL', group: 'general' },
   { key: 'site_name', value: 'SellForMe', label: '站点名称', group: 'general' },
+  { key: 'contact_method', value: 'whatsapp', label: '前端联系方式 (whatsapp/line)', group: 'general' },
   // Email SMTP
   { key: 'smtp_host', value: '', label: 'SMTP服务器地址', group: 'email' },
   { key: 'smtp_port', value: '587', label: 'SMTP端口', group: 'email' },

@@ -25,6 +25,7 @@ const routes = [
       { path: 'agents', name: 'Agents', component: () => import('../views/AgentsView.vue'), meta: { title: '代理管理', adminOnly: true } },
       { path: 'scraper', name: 'Scraper', component: () => import('../views/ScraperView.vue'), meta: { title: '数据采集', adminOnly: true } },
       { path: 'whatsapp', name: 'WhatsApp', component: () => import('../views/WhatsAppView.vue'), meta: { title: 'WhatsApp管理' } },
+      { path: 'line', name: 'Line', component: () => import('../views/LineView.vue'), meta: { title: 'LINE管理' } },
       { path: 'traffic', name: 'Traffic', component: () => import('../views/TrafficView.vue'), meta: { title: '流量统计' } },
       { path: 'subscribers', name: 'Subscribers', component: () => import('../views/SubscribersView.vue'), meta: { title: '邮件订阅', adminOnly: true } },
       { path: 'decoration', name: 'Decoration', component: () => import('../views/DecorationView.vue'), meta: { title: '页面装修', adminOnly: true } },

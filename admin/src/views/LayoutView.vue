@@ -18,6 +18,7 @@ const allMenuItems = [
   { path: '/agents', title: '代理管理', icon: 'Avatar', adminOnly: true },
   { path: '/scraper', title: '数据采集', icon: 'Download', adminOnly: true },
   { path: '/whatsapp', title: 'WhatsApp管理', icon: 'ChatDotRound' },
+  { path: '/line', title: 'LINE管理', icon: 'ChatLineSquare' },
   { path: '/traffic', title: '流量统计', icon: 'TrendCharts' },
   { path: '/subscribers', title: '邮件订阅', icon: 'Message', adminOnly: true },
   { path: '/decoration', title: '页面装修', icon: 'Brush', adminOnly: true },

@@ -50,6 +50,23 @@ function initCurrentLang() {
   if (cookie) {
     const found = languages.find(l => l.code === cookie[1])
     if (found) currentLang.value = found
+    return
+  }
+
+  // First visit: auto-detect browser language (only once)
+  if (sessionStorage.getItem('lang_detected')) return
+  sessionStorage.setItem('lang_detected', '1')
+
+  const browserLang = navigator.language || navigator.userLanguage || 'en'
+  // Try exact match first (e.g. zh-CN, zh-TW), then prefix match (e.g. zh -> zh-CN, th -> th)
+  const exact = languages.find(l => l.code.toLowerCase() === browserLang.toLowerCase())
+  const prefix = !exact && languages.find(l => l.code.toLowerCase().startsWith(browserLang.split('-')[0].toLowerCase()))
+  const match = exact || prefix
+  if (match && match.code !== 'en') {
+    currentLang.value = match
+    document.cookie = 'googtrans=/en/' + match.code + '; path=/'
+    document.cookie = 'googtrans=/en/' + match.code + '; path=/; domain=' + location.hostname
+    location.reload()
   }
 }
 initCurrentLang()
@@ -106,7 +123,13 @@ function selectCurrency(code) {
   currencyDropdownOpen.value = false
 }
 
-const currencyFlags = { USD: 'us', CAD: 'ca', AUD: 'au', EUR: 'eu', GBP: 'gb' }
+const currencyFlags = {
+  USD: 'us', EUR: 'eu', GBP: 'gb', CAD: 'ca', AUD: 'au',
+  JPY: 'jp', KRW: 'kr', CNY: 'cn', HKD: 'hk', TWD: 'tw',
+  SGD: 'sg', MYR: 'my', THB: 'th', PHP: 'ph', INR: 'in',
+  AED: 'ae', SAR: 'sa', BRL: 'br', MXN: 'mx', CHF: 'ch',
+  SEK: 'se', NOK: 'no', DKK: 'dk', NZD: 'nz', ZAR: 'za',
+}
 function flagUrl(code) { return `https://flagcdn.com/w40/${currencyFlags[code]}.png` }
 
 </script>
@@ -307,7 +330,7 @@ function flagUrl(code) { return `https://flagcdn.com/w40/${currencyFlags[code]}.
 /* Currency Selector */
 .currency-selector { display: flex; align-items: center; gap: 4px; padding: 8px 12px; cursor: pointer; font-size: var(--font-size-sm); font-weight: 500; position: relative; border-radius: var(--radius-md); transition: background var(--transition-fast); }
 .currency-selector:hover { background: var(--color-bg-gray); }
-.currency-dropdown { position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); min-width: 100px; z-index: 10; overflow: hidden; }
+.currency-dropdown { position: absolute; top: 100%; right: 0; background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); min-width: 100px; z-index: 10; overflow-y: auto; max-height: 360px; }
 .currency-flag { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }
 .currency-option { padding: 8px 16px; cursor: pointer; font-size: var(--font-size-sm); transition: background var(--transition-fast); display: flex; align-items: center; gap: 6px; }
 .currency-option:hover, .currency-option.active { background: var(--color-bg-gray); color: var(--color-primary); }

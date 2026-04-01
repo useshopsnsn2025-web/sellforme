@@ -114,10 +114,19 @@ onMounted(fetchConfigs)
         <el-card v-loading="loading" shadow="never">
           <el-form label-width="140px" style="max-width:600px">
             <el-form-item v-for="c in generalConfigs" :key="c.key" :label="c.label || c.key">
-              <el-input v-model="formData[c.key]" :placeholder="`请输入${c.label || c.key}`" />
-              <div v-if="c.key === 'site_url'" class="form-hint">
-                客户前端的访问地址，用于生成代理推广链接。例如：https://www.example.com
-              </div>
+              <template v-if="c.key === 'contact_method'">
+                <el-select v-model="formData[c.key]" style="width:100%">
+                  <el-option value="whatsapp" label="WhatsApp" />
+                  <el-option value="line" label="LINE" />
+                </el-select>
+                <div class="form-hint">选择前端客户联系按钮显示的联系方式类型</div>
+              </template>
+              <template v-else>
+                <el-input v-model="formData[c.key]" :placeholder="`请输入${c.label || c.key}`" />
+                <div v-if="c.key === 'site_url'" class="form-hint">
+                  客户前端的访问地址，用于生成代理推广链接。例如：https://www.example.com
+                </div>
+              </template>
             </el-form-item>
           </el-form>
           <div style="margin-top:24px;padding-left:140px">

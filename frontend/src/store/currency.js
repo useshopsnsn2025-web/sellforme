@@ -57,8 +57,31 @@ const SYMBOLS = {
   ZAR: 'R',
 }
 
+// Browser language → currency mapping
+const LANG_CURRENCY = {
+  'zh-CN': 'CNY', 'zh-TW': 'TWD', 'zh-HK': 'HKD', zh: 'CNY',
+  ja: 'JPY', ko: 'KRW', th: 'THB', vi: 'USD', id: 'USD', ms: 'MYR',
+  fr: 'EUR', de: 'EUR', es: 'EUR', it: 'EUR', nl: 'EUR', pt: 'BRL',
+  ru: 'USD', ar: 'AED', tr: 'USD', pl: 'EUR', sv: 'SEK', nb: 'NOK', no: 'NOK', da: 'DKK',
+  en: 'USD', 'en-GB': 'GBP', 'en-AU': 'AUD', 'en-CA': 'CAD', 'en-NZ': 'NZD',
+  'en-IN': 'INR', 'en-SG': 'SGD', 'en-PH': 'PHP', 'en-ZA': 'ZAR',
+  'en-MY': 'MYR', 'en-HK': 'HKD',
+  'fr-CA': 'CAD', 'fr-CH': 'CHF', 'de-CH': 'CHF', 'it-CH': 'CHF',
+  'es-MX': 'MXN', 'pt-BR': 'BRL',
+  hi: 'INR', tl: 'PHP', fil: 'PHP',
+}
+
+function detectCurrency() {
+  const saved = localStorage.getItem('user_currency')
+  if (saved && RATES[saved]) return saved
+
+  const lang = navigator.language || navigator.userLanguage || 'en'
+  // Try exact match first, then base language
+  return LANG_CURRENCY[lang] || LANG_CURRENCY[lang.split('-')[0]] || 'USD'
+}
+
 export const useCurrencyStore = defineStore('currency', () => {
-  const current = ref('USD')
+  const current = ref(detectCurrency())
   const currencies = Object.keys(RATES)
 
   const symbol = computed(() => SYMBOLS[current.value])
@@ -66,6 +89,7 @@ export const useCurrencyStore = defineStore('currency', () => {
   function setCurrency(code) {
     if (RATES[code]) {
       current.value = code
+      localStorage.setItem('user_currency', code)
     }
   }
 

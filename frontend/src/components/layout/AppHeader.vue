@@ -53,9 +53,9 @@ function initCurrentLang() {
     return
   }
 
-  // First visit: auto-detect browser language (only once)
-  if (sessionStorage.getItem('lang_detected')) return
-  sessionStorage.setItem('lang_detected', '1')
+  // First visit: auto-detect browser language (only once ever)
+  if (localStorage.getItem('lang_detected')) return
+  localStorage.setItem('lang_detected', '1')
 
   const browserLang = navigator.language || navigator.userLanguage || 'en'
   // Try exact match first (e.g. zh-CN, zh-TW), then prefix match (e.g. zh -> zh-CN, th -> th)
@@ -74,6 +74,7 @@ initCurrentLang()
 function selectLanguage(lang) {
   langDropdownOpen.value = false
   currentLang.value = lang
+  localStorage.setItem('lang_detected', '1')
 
   if (lang.code === 'en') {
     // Reset to original

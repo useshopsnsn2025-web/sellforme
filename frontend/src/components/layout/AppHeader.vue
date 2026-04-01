@@ -71,10 +71,21 @@ function initCurrentLang() {
 }
 initCurrentLang()
 
+const langCurrencyMap = {
+  'en': 'USD', 'zh-CN': 'CNY', 'zh-TW': 'TWD', 'ja': 'JPY', 'ko': 'KRW',
+  'fr': 'EUR', 'de': 'EUR', 'es': 'EUR', 'pt': 'BRL', 'ru': 'USD',
+  'ar': 'AED', 'it': 'EUR', 'nl': 'EUR', 'th': 'THB', 'vi': 'USD',
+  'id': 'USD', 'ms': 'MYR', 'tr': 'USD', 'pl': 'EUR', 'sv': 'SEK',
+}
+
 function selectLanguage(lang) {
   langDropdownOpen.value = false
   currentLang.value = lang
   localStorage.setItem('lang_detected', '1')
+
+  // Sync currency with selected language
+  const matchedCurrency = langCurrencyMap[lang.code]
+  if (matchedCurrency) currencyStore.setCurrency(matchedCurrency)
 
   if (lang.code === 'en') {
     // Reset to original

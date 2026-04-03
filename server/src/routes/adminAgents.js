@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const User = require('../models/User')
 const WhatsApp = require('../models/WhatsApp')
+const Line = require('../models/Line')
 const TrafficLog = require('../models/TrafficLog')
 const { apiResponse } = require('../utils/helper')
 const { adminAuth, superAdminOnly } = require('../middleware/auth')
@@ -16,13 +17,15 @@ router.get('/', async (req, res) => {
     // Enrich with stats
     const enriched = await Promise.all(agents.map(async (agent) => {
       const obj = agent.toJSON()
-      const [customersCount, whatsappCount, todayTraffic] = await Promise.all([
+      const [customersCount, whatsappCount, lineCount, todayTraffic] = await Promise.all([
         User.countDocuments({ role: 'customer', agent_id: agent._id }),
         WhatsApp.countDocuments({ agent_id: agent._id }),
+        Line.countDocuments({ agent_id: agent._id }),
         TrafficLog.countDocuments({ agent_id: agent._id, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }),
       ])
       obj.customers_count = customersCount
       obj.whatsapp_count = whatsappCount
+      obj.line_count = lineCount
       obj.today_traffic = todayTraffic
       return obj
     }))
@@ -62,7 +65,7 @@ router.post('/', async (req, res) => {
 // Update agent
 router.put('/:id', async (req, res) => {
   try {
-    const allowed = ['email', 'first_name', 'last_name', 'phone', 'status', 'agent_code', 'agent_weight', 'note', 'tags']
+    const allowed = ['email', 'first_name', 'last_name', 'phone', 'status', 'agent_code', 'agent_weight', 'contact_method', 'note', 'tags']
     const update = {}
     for (const key of allowed) {
       if (req.body[key] !== undefined) update[key] = req.body[key]
@@ -105,8 +108,11 @@ router.delete('/:id', async (req, res) => {
   try {
     const agent = await User.findOneAndDelete({ _id: req.params.id, role: 'agent' })
     if (!agent) return apiResponse(res, 404, '代理不存在')
-    // Clean up agent's WhatsApp numbers
-    await WhatsApp.deleteMany({ agent_id: req.params.id })
+    // Clean up agent's WhatsApp and LINE numbers
+    await Promise.all([
+      WhatsApp.deleteMany({ agent_id: req.params.id }),
+      Line.deleteMany({ agent_id: req.params.id }),
+    ])
     apiResponse(res, 200, '删除成功')
   } catch (err) {
     apiResponse(res, 500, err.message)

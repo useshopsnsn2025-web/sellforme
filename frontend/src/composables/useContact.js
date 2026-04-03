@@ -13,7 +13,8 @@ export function useContact() {
   async function fetchContactMethod() {
     if (methodFetched) return
     try {
-      const res = await api.get('/contact-method')
+      const agentRef = localStorage.getItem('agent_ref') || ''
+      const res = await api.get('/contact-method', { params: { agent_code: agentRef } })
       contactMethod.value = res.data.method || 'whatsapp'
     } catch {}
     methodFetched = true

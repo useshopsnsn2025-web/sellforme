@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
   // Agent fields (for role === 'agent')
   agent_code: { type: String, unique: true, sparse: true },  // unique referral code
   agent_weight: { type: Number, default: 0 },                 // higher = shown as default when no ref
+  contact_method: { type: String, enum: ['whatsapp', 'line'], default: 'whatsapp' }, // preferred contact
 
   // Customer fields — which agent referred this customer
   agent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

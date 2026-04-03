@@ -23,7 +23,7 @@ async function fetchSiteUrl() {
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加代理')
 const editingId = ref(null)
-const form = ref({ email: '', password: '', first_name: '', last_name: '', agent_code: '', agent_weight: 0, note: '' })
+const form = ref({ email: '', password: '', first_name: '', last_name: '', agent_code: '', agent_weight: 0, contact_method: 'whatsapp', note: '' })
 
 // Created link dialog
 const createdLinkVisible = ref(false)
@@ -45,7 +45,7 @@ async function fetchAgents() {
 function openAddDialog() {
   editingId.value = null
   dialogTitle.value = '添加代理'
-  form.value = { email: '', password: '', first_name: '', last_name: '', agent_code: '', agent_weight: 0, note: '' }
+  form.value = { email: '', password: '', first_name: '', last_name: '', agent_code: '', agent_weight: 0, contact_method: 'whatsapp', note: '' }
   dialogVisible.value = true
 }
 
@@ -58,6 +58,7 @@ function openEditDialog(row) {
     last_name: row.last_name || '',
     agent_code: row.agent_code || '',
     agent_weight: row.agent_weight || 0,
+    contact_method: row.contact_method || 'whatsapp',
     note: row.note || '',
   }
   dialogVisible.value = true
@@ -107,7 +108,7 @@ async function handleResetPwd() {
 }
 
 async function handleDelete(id) {
-  await ElMessageBox.confirm('删除代理将同时清除其所有WhatsApp号码，确定要删除吗？', '提示', { type: 'warning' })
+  await ElMessageBox.confirm('删除代理将同时清除其所有WhatsApp和LINE号码，确定要删除吗？', '提示', { type: 'warning' })
   await api.delete(`/agents/${id}`)
   ElMessage.success('删除成功')
   fetchAgents()
@@ -164,8 +165,16 @@ onMounted(() => { fetchSiteUrl(); fetchAgents() })
         <el-table-column label="会员数" width="80" align="center">
           <template #default="{ row }">{{ row.customers_count || 0 }}</template>
         </el-table-column>
+        <el-table-column label="联系方式" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.contact_method === 'line' ? 'success' : ''" size="small">{{ row.contact_method === 'line' ? 'LINE' : 'WhatsApp' }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="WhatsApp" width="90" align="center">
           <template #default="{ row }">{{ row.whatsapp_count || 0 }}</template>
+        </el-table-column>
+        <el-table-column label="LINE" width="70" align="center">
+          <template #default="{ row }">{{ row.line_count || 0 }}</template>
         </el-table-column>
         <el-table-column label="今日流量" width="90" align="center">
           <template #default="{ row }">{{ row.today_traffic || 0 }}</template>
@@ -202,6 +211,13 @@ onMounted(() => { fetchSiteUrl(); fetchAgents() })
         </el-form-item>
         <el-form-item label="姓">
           <el-input v-model="form.last_name" placeholder="可选" />
+        </el-form-item>
+        <el-form-item label="联系方式">
+          <el-select v-model="form.contact_method" style="width:100%">
+            <el-option value="whatsapp" label="WhatsApp" />
+            <el-option value="line" label="LINE" />
+          </el-select>
+          <span style="color:#909399;font-size:12px;margin-top:4px;display:block">前端客户联系按钮显示的联系方式</span>
         </el-form-item>
         <el-form-item label="权重">
           <el-input-number v-model="form.agent_weight" :min="0" :max="9999" />

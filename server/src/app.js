@@ -101,10 +101,28 @@ app.use('/api/traffic', require('./routes/traffic'))
 app.use('/api/page-config', require('./routes/pageConfig'))
 app.use('/api/subscribe', require('./routes/subscribe'))
 
-// Public: get contact method setting
+// Public: get contact method (per-agent or global fallback)
 app.get('/api/contact-method', async (req, res) => {
   try {
+    const { agent_code } = req.query
+    const User = require('./models/User')
     const SiteConfig = require('./models/SiteConfig')
+
+    // Try agent-specific setting first
+    if (agent_code) {
+      const agent = await User.findOne({ agent_code: agent_code.toLowerCase(), role: 'agent', status: 'active' })
+      if (agent?.contact_method) {
+        return res.json({ code: 200, msg: 'ok', data: { method: agent.contact_method } })
+      }
+    }
+
+    // Fallback: highest-weight agent's setting
+    const topAgent = await User.findOne({ role: 'agent', status: 'active' }).sort({ agent_weight: -1 })
+    if (topAgent?.contact_method) {
+      return res.json({ code: 200, msg: 'ok', data: { method: topAgent.contact_method } })
+    }
+
+    // Global fallback
     const cfg = await SiteConfig.findOne({ key: 'contact_method' })
     res.json({ code: 200, msg: 'ok', data: { method: cfg?.value || 'whatsapp' } })
   } catch {

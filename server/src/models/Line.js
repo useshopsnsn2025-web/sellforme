@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const lineSchema = new mongoose.Schema({
   agent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  line_id: { type: String, required: true },
+  line_url: { type: String, required: true },
   name: { type: String, default: '' },
   status: { type: String, enum: ['active', 'banned', 'disabled'], default: 'active' },
   click_count: { type: Number, default: 0 },
@@ -14,6 +14,6 @@ const lineSchema = new mongoose.Schema({
   timestamps: true
 })
 
-lineSchema.index({ agent_id: 1, line_id: 1 }, { unique: true })
+lineSchema.index({ agent_id: 1, line_url: 1 }, { unique: true })
 
 module.exports = mongoose.model('Line', lineSchema)

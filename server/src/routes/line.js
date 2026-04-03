@@ -25,7 +25,7 @@ router.get('/next', async (req, res) => {
       .sort({ click_count: 1, last_clicked_at: 1 })
     if (!item) return apiResponse(res, 404, 'No available LINE account')
 
-    apiResponse(res, 200, 'ok', { line_id: item.line_id, id: item._id, name: item.name })
+    apiResponse(res, 200, 'ok', { line_url: item.line_url, id: item._id, name: item.name })
   } catch (err) {
     apiResponse(res, 500, err.message)
   }
@@ -41,7 +41,7 @@ router.post('/click', async (req, res) => {
       last_clicked_at: new Date()
     }, { new: true })
     if (!item) return apiResponse(res, 404, 'Not found')
-    apiResponse(res, 200, 'ok', { line_id: item.line_id })
+    apiResponse(res, 200, 'ok', { line_url: item.line_url })
   } catch (err) {
     apiResponse(res, 500, err.message)
   }
@@ -65,7 +65,7 @@ router.post('/report', async (req, res) => {
     const next = await Line.findOne({ agent_id: agentId, status: 'active' })
       .sort({ click_count: 1, last_clicked_at: 1 })
     if (!next) return apiResponse(res, 404, 'No available LINE account')
-    apiResponse(res, 200, 'ok', { line_id: next.line_id, id: next._id, name: next.name })
+    apiResponse(res, 200, 'ok', { line_url: next.line_url, id: next._id, name: next.name })
   } catch (err) {
     apiResponse(res, 500, err.message)
   }

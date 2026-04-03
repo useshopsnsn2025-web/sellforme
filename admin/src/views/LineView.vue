@@ -12,7 +12,7 @@ const loading = ref(true)
 const stats = ref({ total: 0, active: 0, banned: 0, disabled: 0, total_clicks: 0 })
 const dialogVisible = ref(false)
 const editingId = ref(null)
-const form = ref({ line_id: '', name: '', note: '', sort_weight: 0, agent_id: '' })
+const form = ref({ line_url: '', name: '', note: '', sort_weight: 0, agent_id: '' })
 const agents = ref([])
 
 async function fetchAgents() {
@@ -42,16 +42,16 @@ async function fetchStats() {
 function openDialog(item = null) {
   if (item) {
     editingId.value = item._id
-    form.value = { line_id: item.line_id, name: item.name || '', note: item.note || '', sort_weight: item.sort_weight || 0, agent_id: item.agent_id?._id || item.agent_id || '' }
+    form.value = { line_url: item.line_url, name: item.name || '', note: item.note || '', sort_weight: item.sort_weight || 0, agent_id: item.agent_id?._id || item.agent_id || '' }
   } else {
     editingId.value = null
-    form.value = { line_id: '', name: '', note: '', sort_weight: 0, agent_id: '' }
+    form.value = { line_url: '', name: '', note: '', sort_weight: 0, agent_id: '' }
   }
   dialogVisible.value = true
 }
 
 async function handleSubmit() {
-  if (!form.value.line_id) return ElMessage.warning('请输入LINE ID')
+  if (!form.value.line_url) return ElMessage.warning('请输入LINE链接')
   if (isAdmin.value && !editingId.value && !form.value.agent_id) return ElMessage.warning('请选择所属代理')
   try {
     if (editingId.value) {
@@ -87,7 +87,7 @@ async function toggleStatus(item) {
 }
 
 async function markBanned(item) {
-  await ElMessageBox.confirm(`确定将 ${item.line_id} 标记为已封禁？`, '封禁账号', { type: 'warning' })
+  await ElMessageBox.confirm(`确定将 ${item.line_url} 标记为已封禁？`, '封禁账号', { type: 'warning' })
   await api.put(`/line/${item._id}/ban`)
   ElMessage.success('已标记为封禁')
   fetchList()
@@ -95,7 +95,7 @@ async function markBanned(item) {
 }
 
 async function resetClicks(item) {
-  await ElMessageBox.confirm(`确定重置 ${item.line_id} 的点击统计？`, '提示', { type: 'warning' })
+  await ElMessageBox.confirm(`确定重置 ${item.line_url} 的点击统计？`, '提示', { type: 'warning' })
   await api.put(`/line/${item._id}/reset-clicks`)
   ElMessage.success('已重置')
   fetchList()
@@ -165,9 +165,9 @@ onMounted(() => {
 
     <el-card v-loading="loading">
       <el-table :data="list">
-        <el-table-column label="LINE ID" min-width="160">
+        <el-table-column label="LINE链接" min-width="200">
           <template #default="{ row }">
-            <div style="font-weight:600;font-size:14px">{{ row.line_id }}</div>
+            <div style="font-weight:600;font-size:14px">{{ row.line_url }}</div>
             <div v-if="row.name" style="color:#999;font-size:12px">{{ row.name }}</div>
           </template>
         </el-table-column>
@@ -228,8 +228,8 @@ onMounted(() => {
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="LINE ID" required>
-          <el-input v-model="form.line_id" placeholder="LINE ID，如 @shop123 或 username" />
+        <el-form-item label="LINE链接" required>
+          <el-input v-model="form.line_url" placeholder="如 https://line.me/ti/p/AbCdEfGh123" />
         </el-form-item>
         <el-form-item label="名称">
           <el-input v-model="form.name" placeholder="备注名称（可选）" />

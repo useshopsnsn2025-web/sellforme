@@ -39,16 +39,16 @@ router.get('/stats', async (req, res) => {
 // Create
 router.post('/', async (req, res) => {
   try {
-    const { line_id, name, note, sort_weight } = req.body
-    if (!line_id) return apiResponse(res, 400, '请输入LINE ID')
+    const { line_url, name, note, sort_weight } = req.body
+    if (!line_url) return apiResponse(res, 400, '请输入LINE链接')
 
     const agentId = req.user.role === 'agent' ? req.user._id : req.body.agent_id
     if (!agentId) return apiResponse(res, 400, '请指定代理')
 
-    const exists = await Line.findOne({ agent_id: agentId, line_id })
-    if (exists) return apiResponse(res, 400, '该LINE ID已存在')
+    const exists = await Line.findOne({ agent_id: agentId, line_url })
+    if (exists) return apiResponse(res, 400, '该LINE链接已存在')
 
-    const item = await Line.create({ agent_id: agentId, line_id, name, note, sort_weight: sort_weight || 0 })
+    const item = await Line.create({ agent_id: agentId, line_url, name, note, sort_weight: sort_weight || 0 })
     apiResponse(res, 200, 'ok', { item })
   } catch (err) {
     apiResponse(res, 500, err.message)

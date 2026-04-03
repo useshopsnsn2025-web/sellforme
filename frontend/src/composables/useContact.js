@@ -7,7 +7,7 @@ let methodFetched = false
 
 export function useContact() {
   const contactId = ref('')
-  const contactValue = ref('') // phone for whatsapp, line_id for line
+  const contactValue = ref('') // phone for whatsapp, line_url for line
   const contactName = ref('')
 
   async function fetchContactMethod() {
@@ -25,7 +25,7 @@ export function useContact() {
     try {
       if (contactMethod.value === 'line') {
         const res = await api.get('/line/next', { params: { agent_code: agentRef } })
-        contactValue.value = res.data.line_id
+        contactValue.value = res.data.line_url
         contactId.value = res.data.id
         contactName.value = res.data.name
       } else {
@@ -46,8 +46,7 @@ export function useContact() {
     }
     if (contactValue.value) {
       if (contactMethod.value === 'line') {
-        const lineId = contactValue.value.replace(/^@/, '')
-        window.open(`https://line.me/ti/p/~${lineId}`, '_blank')
+        window.open(contactValue.value, '_blank')
       } else {
         const phone = contactValue.value.replace(/[^0-9]/g, '')
         window.open(`https://wa.me/${phone}`, '_blank')

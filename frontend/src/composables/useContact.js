@@ -1,9 +1,8 @@
 import { ref } from 'vue'
 import api from '@/utils/api'
 
-// Cached contact method - shared across components
+// Shared contact method
 const contactMethod = ref('whatsapp')
-let methodFetched = false
 
 export function useContact() {
   const contactId = ref('')
@@ -11,13 +10,11 @@ export function useContact() {
   const contactName = ref('')
 
   async function fetchContactMethod() {
-    if (methodFetched) return
     try {
       const agentRef = localStorage.getItem('agent_ref') || ''
       const res = await api.get('/contact-method', { params: { agent_code: agentRef } })
       contactMethod.value = res.data.method || 'whatsapp'
     } catch {}
-    methodFetched = true
   }
 
   async function fetchContact() {
